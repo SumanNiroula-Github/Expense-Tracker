@@ -1,8 +1,50 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function Register() {
-  const navigate = useNavigate(); // Hook to navigate between pages
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [cpassword, setCpassword] = useState("");
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleRegister = async (e) => {
+    e.preventDefault(); // Prevent form from reloading the page
+
+    // Clear previous error
+    setError(null);
+
+    // Check if passwords match
+    if (password !== cpassword) {
+      return setError("Passwords do not match.");
+    }
+
+    setLoading(true); // Set loading state
+
+    try {
+      // Send API request to register the user
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/register",
+        {
+          username,
+          email,
+          password,
+          cpassword,
+        }
+      );
+
+      // Handle success
+      alert(response.data.message); // Show success message
+      navigate("/login"); // Redirect to login page
+    } catch (error) {
+      setError(error.response?.data?.error || "Server error.");
+    } finally {
+      setLoading(false); // Reset loading state
+    }
+  };
 
   return (
     <div className="bg-red-600 min-h-screen flex items-center justify-center">
@@ -10,7 +52,7 @@ function Register() {
         <h1 className="text-3xl font-bold text-center text-red-600 mb-6">
           Register
         </h1>
-        <form>
+        <form onSubmit={handleRegister}>
           {/* Username */}
           <div className="mb-4">
             <label
@@ -24,6 +66,8 @@ function Register() {
               id="username"
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
               placeholder="Enter your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
           </div>
@@ -41,6 +85,8 @@ function Register() {
               id="email"
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
               placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -58,6 +104,8 @@ function Register() {
               id="password"
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
               placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
@@ -75,16 +123,22 @@ function Register() {
               id="confirmPassword"
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
               placeholder="Confirm your password"
+              value={cpassword}
+              onChange={(e) => setCpassword(e.target.value)}
               required
             />
           </div>
+
+          {/* Error Message */}
+          {error && <p className="text-red-600 text-center mb-4">{error}</p>}
 
           {/* Submit Button */}
           <button
             type="submit"
             className="w-full bg-red-600 text-white py-3 px-6 rounded-lg font-semibold text-lg hover:bg-red-700"
+            disabled={loading} // Disable button while loading
           >
-            Register
+            {loading ? "Registering..." : "Register"}
           </button>
 
           {/* Login Redirect */}

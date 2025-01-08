@@ -10,8 +10,16 @@ const authRoutes = require("./route/auth");
 const app = express();
 
 // Middleware
-app.use(cors());
+
 app.use(bodyParser.json());
+
+const corsOptions = {
+  origin: "http://localhost:3000", // Allow requests from frontend running on localhost:3000
+  methods: ["GET", "POST", "PUT", "DELETE"], // Allow specific HTTP methods
+  allowedHeaders: ["Content-Type", "Authorization"], // Specify allowed headers
+};
+
+app.use(cors(corsOptions)); 
 
 // Routes
 app.use("/api/auth", authRoutes);
